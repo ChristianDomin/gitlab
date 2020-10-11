@@ -16,22 +16,19 @@ spec:
       - name: gitlab
         image: gitlab/gitlab-ee:latest
         volumeMounts:
-        - name: config
+        - name: gitlab-volume
           mountPath: /etc/gitlab
-        - name: logs
+          subPath: config/
+        - name: gitlab-volume
           mountPath: /var/log/gitlab
-        - name: data
+          subPath: logs/
+        - name: gitlab-volume
           mountPath: /var/opt/gitlab
+          subPath: data/
       volumes:
-      - name: config
+      - name: gitlab-volume
         persistentVolumeClaim:
-          claimName: gitlab-volume-claim-config
-      - name: logs
-        persistentVolumeClaim:
-          claimName: gitlab-volume-claim-logs
-      - name: data
-        persistentVolumeClaim:
-          claimName: gitlab-volume-claim-data
+          claimName: gitlab-volume-claim
           
 ---
 
@@ -56,9 +53,9 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: gitlab-volume-claim-config
+  name: gitlab-volume-claim
 spec:
-  storageClassName: gitlab-volume-config
+  storageClassName: gitlab-volume
   accessModes:
   - ReadWriteOnce
   resources:
@@ -66,77 +63,17 @@ spec:
       storage: 50Gi
       
 ---
-      
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: gitlab-volume-claim-logs
-spec:
-  storageClassName: gitlab-volume-logs
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 50Gi
-      
----
-      
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: gitlab-volume-claim-data
-spec:
-  storageClassName: gitlab-volume-data
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 50Gi
-    
----
-
+ 
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: gitlab-volume-config
+  name: gitlab-volume
 spec:
-  storageClassName: gitlab-volume-config
+  storageClassName: gitlab-volume
   capacity:
     storage: 50Gi
   accessModes:
     - ReadWriteOnce
   nfs:
     server: 192.168.180.100
-    path: /nfs-storage/gitlab/config
-
----
-    
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: gitlab-volume-logs
-spec:
-  storageClassName: gitlab-volume-logs
-  capacity:
-    storage: 50Gi
-  accessModes:
-    - ReadWriteOnce
-  nfs:
-    server: 192.168.180.100
-    path: /nfs-storage/gitlab/logs
-
----
-    
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: gitlab-volume-data
-spec:
-  storageClassName: gitlab-volume-data
-  capacity:
-    storage: 50Gi
-  accessModes:
-    - ReadWriteOnce
-  nfs:
-    server: 192.168.180.100
-    path: /nfs-storage/gitlab/data
+    path: /nfs-storage/gitlab
